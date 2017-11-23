@@ -15,7 +15,8 @@ data:extend({
     alt_selection_mode = {"buildable-type"},
     selection_cursor_box_type = "entity",
     alt_selection_cursor_box_type = "copy",
-    can_be_mod_opened = true    
+    can_be_mod_opened = true,
+    show_in_library = true
   },
   {
     type = "recipe",

@@ -672,9 +672,10 @@ function player_upgrade(player,belt,upgrade, bool)
         name = upgrade.entity_to, 
         position = belt.position, 
         force = belt.force, 
-        fast_replace = true, 
+        fast_replace = true,
         direction = belt.direction, 
         type = belt.belt_to_ground_type, 
+        player = player,
         spill=false
       }
     elseif belt.type == "loader" then 
@@ -686,6 +687,7 @@ function player_upgrade(player,belt,upgrade, bool)
         fast_replace = true, 
         direction = belt.direction, 
         type = belt.loader_type, 
+        player = player,
         spill=false
       }
     elseif belt.type == "inserter" then
@@ -698,9 +700,8 @@ function player_upgrade(player,belt,upgrade, bool)
         force = belt.force, 
         fast_replace = true, 
         direction = belt.direction,
-        spill=false,
-        --pickup_position = pickup,
-        --drop_position = drop
+        player = player,
+        spill=false
       }
       if new_item.valid then
         new_item.pickup_position = pickup
@@ -722,7 +723,8 @@ function player_upgrade(player,belt,upgrade, bool)
         position = belt.position, 
         force = belt.force, 
         fast_replace = true, 
-        direction = belt.direction, 
+        direction = belt.direction,
+        player = player,
         spill=false
       }
     end
