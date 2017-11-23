@@ -1,6 +1,4 @@
-require("prototypes/style")
 data:extend({
-
   {
     type = "selection-tool",
     name = "upgrade-builder",
@@ -17,16 +15,6 @@ data:extend({
     alt_selection_cursor_box_type = "copy",
     can_be_mod_opened = true,
     show_in_library = true
-  },
-  {
-    type = "recipe",
-    name = "upgrade-builder",
-    enabled = true,
-    energy_required = 0.1,
-    ingredients =
-    {
-    },
-    result = "upgrade-builder"
   }
 })
 

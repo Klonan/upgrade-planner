@@ -44,7 +44,7 @@ function get_config_item(player, index, type)
     if not game.item_prototypes[global["config-tmp"][player.name][index][type]].valid then
       return nil
     end
-      
+
     return game.item_prototypes[global["config-tmp"][player.name][index][type]].name
 
 end
@@ -67,7 +67,7 @@ end
 function gui_open_frame(player)
 
   local flow = player.gui.center
-  
+
   local frame = flow.upgrade_planner_config_frame
 
   if frame then
@@ -75,9 +75,9 @@ function gui_open_frame(player)
     global["config-tmp"][player.name] = nil
     return
   end
-  
-  
-  
+
+
+
   global.config[player.name] = global.config[player.name] or {}
   global["config-tmp"][player.name] = {}
   local i = 0
@@ -86,7 +86,7 @@ function gui_open_frame(player)
       global["config-tmp"][player.name][i] = { from = "", to = "" }
     else
       global["config-tmp"][player.name][i] = {
-        from = global.config[player.name][i].from, 
+        from = global.config[player.name][i].from,
         to = global.config[player.name][i].to
       }
     end
@@ -111,7 +111,7 @@ function gui_open_frame(player)
   --drop_down.style.minimal_height = 50
   drop_down.style.minimal_width = 164
   drop_down.style.maximal_width = 0
-  if not global.storage then 
+  if not global.storage then
     global.storage = {}
   end
   if not global.storage[player.name] then
@@ -193,11 +193,11 @@ function gui_open_frame(player)
     local sprite = nil
     local tooltip = nil
     local from = get_config_item(player, i, "from")
-    if from then 
-      --sprite = "item/"..get_config_item(player, i, "from") 
+    if from then
+      --sprite = "item/"..get_config_item(player, i, "from")
       tooltip = items[from].localised_name
     end
-    local elem = ruleset_grid.add{ 
+    local elem = ruleset_grid.add{
       type = "choose-elem-button",
       name = "upgrade_planner_from_" .. i,
       style = "slot_button_style",
@@ -209,8 +209,8 @@ function gui_open_frame(player)
     local sprite = nil
     local tooltip = nil
     local to = get_config_item(player, i, "to")
-    if to then 
-      --sprite = "item/"..get_config_item(player, i, "to") 
+    if to then
+      --sprite = "item/"..get_config_item(player, i, "to")
       tooltip = items[to].localised_name
     end
     local elem = ruleset_grid.add{
@@ -389,7 +389,7 @@ function gui_restore(player, name)
         end
         local name = get_config_item(player, i, "to")
         ruleset_grid["upgrade_planner_to_" .. i].elem_value = name
-        if name and name ~= "" then 
+        if name and name ~= "" then
           ruleset_grid["upgrade_planner_to_" .. i].tooltip = items[name].localised_name
         else
           ruleset_grid["upgrade_planner_to_" .. i].tooltip = ""
@@ -399,7 +399,7 @@ function gui_restore(player, name)
 
 end
 
-script.on_event(defines.events.on_gui_click, function(event) 
+script.on_event(defines.events.on_gui_click, function(event)
 
     local element = event.element
     --print_full_gui_name(element)
@@ -416,7 +416,7 @@ script.on_event(defines.events.on_gui_click, function(event)
       player.cursor_stack.set_stack({name = "upgrade-builder"})
       return
     end
-    
+
     if name == "upgrade_planner_storage_rename" then
       local children = element.parent.children
       for k, child in pairs (children) do
@@ -428,7 +428,7 @@ script.on_event(defines.events.on_gui_click, function(event)
       end
       return
     end
-    
+
     if name == "upgrade_planner_storage_cancel" then
       local children = element.parent.children
       for k = 4, 6 do
@@ -437,7 +437,7 @@ script.on_event(defines.events.on_gui_click, function(event)
       children[4].text = children[1].get_item(children[1].selected_index)
       return
     end
-    
+
     if name == "upgrade_planner_storage_confirm" then
       local index = global.storage_index[player.name]
       local children = element.parent.children
@@ -481,7 +481,7 @@ script.on_event(defines.events.on_gui_click, function(event)
       global.storage_index[player.name] = index
       return
     end
-    
+
     if name == "upgrade_planner_storage_delete" then
       local children = element.parent.children
       local dropdown = children[1]
@@ -569,8 +569,8 @@ script.on_event(defines.events.on_player_alt_selected_area, function(event)
 end)
 
 function on_selected_area(event)
-  if event.item ~= "upgrade-builder" then return end--If its a upgrade builder 
-  
+  if event.item ~= "upgrade-builder" then return end--If its a upgrade builder
+
   local player = game.players[event.player_index]
   local config = global.config[player.name]
   if config == nil then return end
@@ -656,37 +656,37 @@ function player_upgrade(player,belt,upgrade, bool)
   if global.temporary_ignore[belt.name] then return end
   local surface = player.surface
   local amount = upgrade.item_amount or 1
-  if player.get_item_count(upgrade.item_to) >= amount or player.cheat_mode then 
+  if player.get_item_count(upgrade.item_to) >= amount or player.cheat_mode then
     local d = belt.direction
     local f = belt.force
     local p = belt.position
     local n = belt.name
     local new_item
     script.raise_event(defines.events.on_pre_player_mined_item,{player_index = player.index, entity = belt})
-    if belt.type == "underground-belt" then 
+    if belt.type == "underground-belt" then
       if belt.neighbours and bool then
         player_upgrade(player,belt.neighbours,upgrade,false)
       end
       new_item = surface.create_entity
       {
-        name = upgrade.entity_to, 
-        position = belt.position, 
-        force = belt.force, 
+        name = upgrade.entity_to,
+        position = belt.position,
+        force = belt.force,
         fast_replace = true,
-        direction = belt.direction, 
-        type = belt.belt_to_ground_type, 
+        direction = belt.direction,
+        type = belt.belt_to_ground_type,
         player = player,
         spill=false
       }
-    elseif belt.type == "loader" then 
+    elseif belt.type == "loader" then
       new_item = surface.create_entity
       {
-        name = upgrade.entity_to, 
-        position = belt.position, 
-        force = belt.force, 
-        fast_replace = true, 
-        direction = belt.direction, 
-        type = belt.loader_type, 
+        name = upgrade.entity_to,
+        position = belt.position,
+        force = belt.force,
+        fast_replace = true,
+        direction = belt.direction,
+        type = belt.loader_type,
         player = player,
         spill=false
       }
@@ -695,10 +695,10 @@ function player_upgrade(player,belt,upgrade, bool)
       local pickup = {x = belt.pickup_position.x, y = belt.pickup_position.y}
       new_item = surface.create_entity
       {
-        name = upgrade.entity_to, 
-        position = belt.position, 
-        force = belt.force, 
-        fast_replace = true, 
+        name = upgrade.entity_to,
+        position = belt.position,
+        force = belt.force,
+        fast_replace = true,
         direction = belt.direction,
         player = player,
         spill=false
@@ -719,10 +719,10 @@ function player_upgrade(player,belt,upgrade, bool)
     else
       new_item = surface.create_entity
       {
-        name = upgrade.entity_to, 
-        position = belt.position, 
-        force = belt.force, 
-        fast_replace = true, 
+        name = upgrade.entity_to,
+        position = belt.position,
+        force = belt.force,
+        fast_replace = true,
         direction = belt.direction,
         player = player,
         spill=false
@@ -756,7 +756,7 @@ function player_upgrade(player,belt,upgrade, bool)
         defines.events.on_player_mined_item,
         {
           player_index = player.index,
-          item_stack = 
+          item_stack =
           {
             name = upgrade.item_from,
             count = amount
@@ -785,11 +785,11 @@ function player_upgrade(player,belt,upgrade, bool)
       end
       player.teleport({p_x,p_y})
       local assembling = surface.find_entities_filtered{area = a, name = upgrade.entity_to}
-      if not assembling[1] then 
+      if not assembling[1] then
         player.print("Upgrade planner error - Entity to raise was not found")
         player.cursor_stack.set_stack{name = "upgrade-builder", count = 1}
         player.insert{name = upgrade.item_from, count = amount}
-        return 
+        return
       end
       script.raise_event(defines.events.on_built_entity,{player_index = player.index, created_entity = assembling[1]})
       --Give back the inventory to the new entity
@@ -805,7 +805,7 @@ function player_upgrade(player,belt,upgrade, bool)
       if proxy[1]~= nil then
         proxy[1].destroy()
       end
-      player.cursor_stack.set_stack{name = "upgrade-builder", count = 1}      
+      player.cursor_stack.set_stack{name = "upgrade-builder", count = 1}
     else
       player.remove_item{name = upgrade.item_to, count = amount}
       player.insert{name = upgrade.item_from, count = amount}
@@ -853,7 +853,7 @@ function robot_upgrade_modules(inventory, map, owner)
       if upgrade and upgrade.item_to and recipe and check_module_eligibility(upgrade.item_to, recipe) then
         local entity = surface.create_entity{name = "item-on-ground", stack = {name = slot.name, count = slot.count}, position = owner.position, force = owner.force}
         entity.order_deconstruction(owner.force)
-        if modules[upgrade.item_to] then 
+        if modules[upgrade.item_to] then
           modules[upgrade.item_to] = modules[upgrade.item_to] + slot.count
         else
           modules[upgrade.item_to] = slot.count
@@ -891,8 +891,8 @@ function bot_upgrade(player, belt, upgrade, bool, hashmap)
   local f = belt.force
   local p = belt.position
   local a = {{p.x-0.5,p.y-0.5},{p.x+0.5,p.y+0.5}}
-  
-  if belt.type == "underground-belt" then 
+
+  if belt.type == "underground-belt" then
     if belt.neighbours and bool then
       bot_upgrade(player,belt.neighbours, upgrade, false)
     end
@@ -919,7 +919,7 @@ function bot_upgrade(player, belt, upgrade, bool, hashmap)
       break
     end
   end
-  if not blueprint_index then 
+  if not blueprint_index then
     player.print("Upgrade planner bot upgrade blueprint index error - Upgrade unsuccessful: "..belt.name.." -> "..upgrade)
     player.cursor_stack.set_stack{name = "upgrade-builder", count = 1}
     return
@@ -998,13 +998,13 @@ function verify_all_configs()
 end
 
 script.on_event(defines.events.on_player_joined_game, function(event)
-  local player = game.players[event.player_index] 
+  local player = game.players[event.player_index]
   gui_init(player)
 end)
 
 function upgrade_blueprint(player)
   local stack = player.cursor_stack
-  if not stack.valid then 
+  if not stack.valid then
     return
   end
   if not stack.valid_for_read then
@@ -1093,7 +1093,7 @@ function upgrade_blueprint(player)
 end
 
 function is_exception(from, to)
-  local exceptions = 
+  local exceptions =
   {
     {from = "container", to = "logistic-container"},
     {from = "logistic-container", to = "container"}
@@ -1250,7 +1250,7 @@ local b='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
 
 -- encoding
 function enc(data)
-    return ((data:gsub('.', function(x) 
+    return ((data:gsub('.', function(x)
         local r,b='',x:byte()
         for i=8,1,-1 do r=r..(b%2^i-b%2^(i-1)>0 and '1' or '0') end
         return r;
