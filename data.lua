@@ -3,6 +3,7 @@ data:extend({
     type = "selection-tool",
     name = "upgrade-builder",
     icon = "__upgrade-planner__/builder.png",
+    icon_size = 32,
     stack_size = 1,
     subgroup = "tool",
     order = "c[automated-construction]-d[upgrade-builder]",
@@ -30,31 +31,3 @@ data:extend{
     key_sequence = "CONTROL + U",
   }
 }
-
-data.raw["gui-style"]["default"].storage_flow_style =
-  {
-    type = "flow_style",
-    parent = "flow_style",
-    horizontal_spacing = 2,
-    max_on_row = 3
-  }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

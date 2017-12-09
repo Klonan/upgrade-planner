@@ -19,33 +19,31 @@ end
 
 function count_keys(hashmap)
 
-    local result = 0
+  local result = 0
 
-    for _, __ in pairs(hashmap) do
-        result = result + 1
-    end
+  for _, __ in pairs(hashmap) do
+    result = result + 1
+  end
 
-    return result
+  return result
 
 end
 
 function get_config_item(player, index, type)
 
-    if not global["config-tmp"][player.name]
-            or index > #global["config-tmp"][player.name]
-            or global["config-tmp"][player.name][index][type] == "" then
+  if not global["config-tmp"][player.name]
+  or index > #global["config-tmp"][player.name]
+  or global["config-tmp"][player.name][index][type] == "" then
+    return nil
+  end
+  if not game.item_prototypes[global["config-tmp"][player.name][index][type]] then
+    return nil
+  end
+  if not game.item_prototypes[global["config-tmp"][player.name][index][type]].valid then
+    return nil
+  end
 
-        return nil
-
-    end
-    if not game.item_prototypes[global["config-tmp"][player.name][index][type]] then
-      return nil
-    end
-    if not game.item_prototypes[global["config-tmp"][player.name][index][type]].valid then
-      return nil
-    end
-
-    return game.item_prototypes[global["config-tmp"][player.name][index][type]].name
+  return game.item_prototypes[global["config-tmp"][player.name][index][type]].name
 
 end
 
@@ -103,10 +101,8 @@ function gui_open_frame(player)
   if not global.storage_index[player.name] then
     global.storage_index[player.name] = 1
   end
-  local storage_flow = frame.add{type = "flow", name = "upgrade_planner_storage_flow", colspan = 3}
+  local storage_flow = frame.add{type = "table", name = "upgrade_planner_storage_flow", column_count = 3}
   --storage_flow.style.horizontal_spacing = 2
-  storage_flow.style = "storage_flow_style"
-  storage_flow.style.max_on_row = 3
   local drop_down = storage_flow.add{type = "drop-down", name = "upgrade_planner_drop_down"}
   --drop_down.style.minimal_height = 50
   drop_down.style.minimal_width = 164
@@ -130,13 +126,13 @@ function gui_open_frame(player)
   global.storage_index[player.name] = index
   local storage_to_restore = drop_down.get_item(drop_down.selected_index)
   local rename_button = storage_flow.add{type="sprite-button", name = "upgrade_planner_storage_rename", sprite = "utility/rename_icon_normal", tooltip = {"upgrade-planner.rename-button-tooltip"}}
-  rename_button.style = "slot_button_style"
+  rename_button.style = "slot_button"
   rename_button.style.maximal_width = 24
   rename_button.style.minimal_width = 24
   rename_button.style.maximal_height = 24
   rename_button.style.minimal_height = 24
   local remove_button = storage_flow.add{type="sprite-button", name = "upgrade_planner_storage_delete", sprite = "utility/remove", tooltip = {"upgrade-planner.delete-storage-button-tooltip"} }
-  remove_button.style = "red_slot_button_style"
+  remove_button.style = "red_slot_button"
   remove_button.style.maximal_width = 24
   remove_button.style.minimal_width = 24
   remove_button.style.maximal_height = 24
@@ -144,14 +140,14 @@ function gui_open_frame(player)
   local rename_field = storage_flow.add{type = "textfield", name = "upgrade_planner_storage_rename_textfield", text = drop_down.get_item(drop_down.selected_index)}
   rename_field.style.visible = false
   local confirm_button = storage_flow.add{type="sprite-button", name = "upgrade_planner_storage_confirm", sprite = "utility/confirm_slot", tooltip = {"upgrade-planner.confirm-storage-name"} }
-  confirm_button.style = "green_slot_button_style"
+  confirm_button.style = "green_slot_button"
   confirm_button.style.maximal_width = 24
   confirm_button.style.minimal_width = 24
   confirm_button.style.maximal_height = 24
   confirm_button.style.minimal_height = 24
   confirm_button.style.visible = false
   local cancel_button = storage_flow.add{type="sprite-button", name = "upgrade_planner_storage_cancel", sprite = "utility/set_bar_slot", tooltip = {"upgrade-planner.cancel-storage-name"} }
-  cancel_button.style = "red_slot_button_style"
+  cancel_button.style = "red_slot_button"
   cancel_button.style.maximal_width = 24
   cancel_button.style.minimal_width = 24
   cancel_button.style.maximal_height = 24
@@ -159,9 +155,9 @@ function gui_open_frame(player)
   cancel_button.style.visible = false
   local ruleset_grid = frame.add{
     type = "table",
-    colspan = 6,
+    column_count = 6,
     name = "upgrade_planner_ruleset_grid",
-    style = "slot_table_style"
+    style = "slot_table"
   }
 
   ruleset_grid.add{
@@ -200,7 +196,7 @@ function gui_open_frame(player)
     local elem = ruleset_grid.add{
       type = "choose-elem-button",
       name = "upgrade_planner_from_" .. i,
-      style = "slot_button_style",
+      style = "slot_button",
       --sprite = sprite,
       elem_type = "item",
       tooltip = tooltip
@@ -216,7 +212,7 @@ function gui_open_frame(player)
     local elem = ruleset_grid.add{
       type = "choose-elem-button",
       name = "upgrade_planner_to_" .. i,
-      --style = "slot_button_style",
+      --style = "slot_button",
       --sprite = sprite,
       elem_type = "item",
       tooltip = tooltip
@@ -225,15 +221,15 @@ function gui_open_frame(player)
     ruleset_grid.add{
       type = "sprite-button",
       name = "upgrade_planner_clear_" .. i,
-      style = "red_slot_button_style",
+      style = "red_slot_button",
       sprite = "utility/remove",
       tooltip = {"upgrade-planner.config-clear", ""}
-      }
+    }
   end
 
   local button_grid = frame.add{
     type = "table",
-    colspan = 4
+    column_count = 4
   }
   button_grid.add{
     type = "sprite-button",
@@ -357,177 +353,173 @@ end
 
 function gui_restore(player, name)
 
-    local frame = player.gui.center.upgrade_planner_config_frame
-    if not frame then return end
-    if not global.storage[player.name] then return end
-    local storage = global.storage[player.name][name]
-    if not storage and name == "New storage" then
-      storage = {}
-    end
-    if not storage then return end
+  local frame = player.gui.center.upgrade_planner_config_frame
+  if not frame then return end
+  if not global.storage[player.name] then return end
+  local storage = global.storage[player.name][name]
+  if not storage and name == "New storage" then
+    storage = {}
+  end
+  if not storage then return end
 
-    global["config-tmp"][player.name] = {}
-    local items = game.item_prototypes
-    local i = 0
-    local ruleset_grid = frame["upgrade_planner_ruleset_grid"]
-    local items = game.item_prototypes
-    for i = 1, MAX_CONFIG_SIZE do
-        if i > #storage then
-          global["config-tmp"][player.name][i] = { from = "", to = "" }
-        else
-          global["config-tmp"][player.name][i] = {
-            from = storage[i].from,
-            to = storage[i].to
-          }
-        end
-        local name = get_config_item(player, i, "from")
-        ruleset_grid["upgrade_planner_from_" .. i].elem_value = name
-        if name and name ~= "" then
-          ruleset_grid["upgrade_planner_from_" .. i].tooltip = items[name].localised_name
-        else
-          ruleset_grid["upgrade_planner_from_" .. i].tooltip = ""
-        end
-        local name = get_config_item(player, i, "to")
-        ruleset_grid["upgrade_planner_to_" .. i].elem_value = name
-        if name and name ~= "" then
-          ruleset_grid["upgrade_planner_to_" .. i].tooltip = items[name].localised_name
-        else
-          ruleset_grid["upgrade_planner_to_" .. i].tooltip = ""
-        end
+  global["config-tmp"][player.name] = {}
+  local items = game.item_prototypes
+  local i = 0
+  local ruleset_grid = frame["upgrade_planner_ruleset_grid"]
+  local items = game.item_prototypes
+  for i = 1, MAX_CONFIG_SIZE do
+    if i > #storage then
+      global["config-tmp"][player.name][i] = { from = "", to = "" }
+    else
+      global["config-tmp"][player.name][i] = {
+        from = storage[i].from,
+        to = storage[i].to
+      }
     end
+    local name = get_config_item(player, i, "from")
+    ruleset_grid["upgrade_planner_from_" .. i].elem_value = name
+    if name and name ~= "" then
+      ruleset_grid["upgrade_planner_from_" .. i].tooltip = items[name].localised_name
+    else
+      ruleset_grid["upgrade_planner_from_" .. i].tooltip = ""
+    end
+    local name = get_config_item(player, i, "to")
+    ruleset_grid["upgrade_planner_to_" .. i].elem_value = name
+    if name and name ~= "" then
+      ruleset_grid["upgrade_planner_to_" .. i].tooltip = items[name].localised_name
+    else
+      ruleset_grid["upgrade_planner_to_" .. i].tooltip = ""
+    end
+  end
   global.config[player.name] = global["config-tmp"][player.name]
 
 end
 
 script.on_event(defines.events.on_gui_click, function(event)
 
-    local element = event.element
-    --print_full_gui_name(element)
-    local name = element.name
-    local player = game.players[event.player_index]
-    --game.print(element.type)
-    --game.print(element.name)
-    if name == "upgrade_blueprint" then
-      upgrade_blueprint(player)
-      return
-    end
-    if name == "give_upgrade_tool" then
-      player.clean_cursor()
-      player.cursor_stack.set_stack({name = "upgrade-builder"})
-      return
-    end
+  local element = event.element
+  --print_full_gui_name(element)
+  local name = element.name
+  local player = game.players[event.player_index]
+  --game.print(element.type)
+  --game.print(element.name)
+  if name == "upgrade_blueprint" then
+    upgrade_blueprint(player)
+    return
+  end
+  if name == "give_upgrade_tool" then
+    player.clean_cursor()
+    player.cursor_stack.set_stack({name = "upgrade-builder"})
+    return
+  end
 
-    if name == "upgrade_planner_storage_rename" then
-      local children = element.parent.children
-      for k, child in pairs (children) do
-        child.style.visible = true
-      end
-      children[4].text = children[1].get_item(children[1].selected_index)
-      if children[4].text == "New storage" then
-        children[4].text = ""
-      end
-      return
+  if name == "upgrade_planner_storage_rename" then
+    local children = element.parent.children
+    for k, child in pairs (children) do
+      child.style.visible = true
     end
+    children[4].text = children[1].get_item(children[1].selected_index)
+    if children[4].text == "New storage" then
+      children[4].text = ""
+    end
+    return
+  end
 
-    if name == "upgrade_planner_storage_cancel" then
-      local children = element.parent.children
-      for k = 4, 6 do
-        children[k].style.visible = false
-      end
-      children[4].text = children[1].get_item(children[1].selected_index)
-      return
+  if name == "upgrade_planner_storage_cancel" then
+    local children = element.parent.children
+    for k = 4, 6 do
+      children[k].style.visible = false
     end
+    children[4].text = children[1].get_item(children[1].selected_index)
+    return
+  end
 
-    if name == "upgrade_planner_storage_confirm" then
-      local index = global.storage_index[player.name]
-      local children = element.parent.children
-      local new_name = children[4].text
-      local length = string.len(new_name)
-      if length < 1 then
-        player.print({"upgrade-planner.storage-name-too-short"})
-        return
-      end
-      -- if length > 36 then
-        -- player.print({"storage-name-too-long"})
-        -- return
-      -- end
-      for k = 4, 6 do
-        children[k].style.visible = false
-      end
-      local items = children[1].items
-      if index > #items then
-        index = #items
-      end
-      local old_name = items[index]
-      if old_name == "New storage" then
-        children[1].add_item("New storage")
-      end
-      if not global.storage then
-        global.storage = {}
-      end
-      if not global.storage[player.name] then
-        global.storage[player.name] = {}
-      end
-      if global.storage[player.name][old_name] then
-        global.storage[player.name][new_name] = global.storage[player.name][old_name]
-      else
-        global.storage[player.name][new_name] = {}
-      end
-      global.storage[player.name][old_name] = nil
-      --game.print(serpent.block(global.storage[player.name][new_name]))
-      children[1].set_item(index, new_name)
-      children[1].selected_index = 0
-      children[1].selected_index = index
-      global.storage_index[player.name] = index
+  if name == "upgrade_planner_storage_confirm" then
+    local index = global.storage_index[player.name]
+    local children = element.parent.children
+    local new_name = children[4].text
+    local length = string.len(new_name)
+    if length < 1 then
+      player.print({"upgrade-planner.storage-name-too-short"})
       return
     end
+    for k = 4, 6 do
+      children[k].style.visible = false
+    end
+    local items = children[1].items
+    if index > #items then
+      index = #items
+    end
+    local old_name = items[index]
+    if old_name == "New storage" then
+      children[1].add_item("New storage")
+    end
+    if not global.storage then
+      global.storage = {}
+    end
+    if not global.storage[player.name] then
+      global.storage[player.name] = {}
+    end
+    if global.storage[player.name][old_name] then
+      global.storage[player.name][new_name] = global.storage[player.name][old_name]
+    else
+      global.storage[player.name][new_name] = {}
+    end
+    global.storage[player.name][old_name] = nil
+    --game.print(serpent.block(global.storage[player.name][new_name]))
+    children[1].set_item(index, new_name)
+    children[1].selected_index = 0
+    children[1].selected_index = index
+    global.storage_index[player.name] = index
+    return
+  end
 
-    if name == "upgrade_planner_storage_delete" then
-      local children = element.parent.children
-      local dropdown = children[1]
-      local index = dropdown.selected_index
-      local name = dropdown.get_item(index)
-      global.storage[player.name][name] = nil
-      if name ~= "New storage" then
-        dropdown.remove_item(index)
-      end
-      if index > 1 then
-        index = index - 1
-      end
-      dropdown.selected_index = 0
-      dropdown.selected_index = index
-      gui_restore(player, dropdown.get_item(index))
-      global.storage_index[player.name] = index
+  if name == "upgrade_planner_storage_delete" then
+    local children = element.parent.children
+    local dropdown = children[1]
+    local index = dropdown.selected_index
+    local name = dropdown.get_item(index)
+    global.storage[player.name][name] = nil
+    if name ~= "New storage" then
+      dropdown.remove_item(index)
+    end
+    if index > 1 then
+      index = index - 1
+    end
+    dropdown.selected_index = 0
+    dropdown.selected_index = index
+    gui_restore(player, dropdown.get_item(index))
+    global.storage_index[player.name] = index
+    return
+  end
+  if name == "upgrade_planner_config_button" then
+    gui_open_frame(player)
+    return
+  end
+  if name == "upgrade_planner_export_config" then
+    export_config(player)
+    return
+  end
+  if name == "upgrade_planner_import_config" then
+    import_config(player)
+    return
+  end
+  if name == "upgrade_planner_frame_close" then
+    player.opened.destroy()
+    gui_open_frame(player)
+    return
+  end
+  if name == "upgrade_planner_import_config_button" then
+    import_config_action(player)
+    return
+  end
+  local type, index = string.match(name, "upgrade_planner_(%a+)_(%d+)")
+  if type and index then
+    if type == "clear" then
+      gui_clear_rule(player, tonumber(index))
       return
     end
-    if name == "upgrade_planner_config_button" then
-      gui_open_frame(player)
-      return
-    end
-    if name == "upgrade_planner_export_config" then
-      export_config(player)
-      return
-    end
-    if name == "upgrade_planner_import_config" then
-      import_config(player)
-      return
-    end
-    if name == "upgrade_planner_frame_close" then
-      player.opened.destroy()
-      gui_open_frame(player)
-      return
-    end
-    if name == "upgrade_planner_import_config_button" then
-      import_config_action(player)
-      return
-    end
-    local type, index = string.match(name, "upgrade_planner_(%a+)_(%d+)")
-    if type and index then
-        if type == "clear" then
-            gui_clear_rule(player, tonumber(index))
-            return
-        end
-    end
+  end
 
 end)
 
@@ -753,17 +745,17 @@ function player_upgrade(player,belt,upgrade, bool)
       end
       script.raise_event
       (
-        defines.events.on_player_mined_item,
+      defines.events.on_player_mined_item,
+      {
+        player_index = player.index,
+        item_stack =
         {
-          player_index = player.index,
-          item_stack =
-          {
-            name = upgrade.item_from,
-            count = amount
-          }
+          name = upgrade.item_from,
+          count = amount
         }
-      )
-      --And then copy the inventory to some table
+      }
+    )
+    --And then copy the inventory to some table
       local inventories = {}
       for index = 1,10 do
         if belt.get_inventory(index) ~= nil then
@@ -796,7 +788,7 @@ function player_upgrade(player,belt,upgrade, bool)
       for j, items in pairs (inventories) do
         for l, contents in pairs (items.contents) do
           if assembling[1] ~= nil then
-          assembling[1].get_inventory(items.name).insert{name = l, count = contents}
+            assembling[1].get_inventory(items.name).insert{name = l, count = contents}
           end
         end
       end
@@ -819,7 +811,7 @@ function player_upgrade(player,belt,upgrade, bool)
 end
 
 function on_alt_selected_area(event)
---this is a lot simpler... but less cool
+  --this is a lot simpler... but less cool
   if event.item ~= "upgrade-builder" then return end
   local player = game.players[event.player_index]
   local config = global.config[player.name]
@@ -880,7 +872,7 @@ function get_recipe(owner)
 end
 
 function bot_upgrade(player, belt, upgrade, bool, hashmap)
-  if not belt then return end
+  if not (belt and belt.valid) then return end
   if not upgrade.entity_to then
     log("Tried to upgrade when entry had no entity: "..serpent.line(upgrade))
     return
@@ -891,6 +883,10 @@ function bot_upgrade(player, belt, upgrade, bool, hashmap)
   local f = belt.force
   local p = belt.position
   local a = {{p.x-0.5,p.y-0.5},{p.x+0.5,p.y+0.5}}
+
+  if belt.to_be_deconstructed(f) then
+    return
+  end
 
   if belt.type == "underground-belt" then
     if belt.neighbours and bool then
@@ -920,7 +916,7 @@ function bot_upgrade(player, belt, upgrade, bool, hashmap)
     end
   end
   if not blueprint_index then
-    player.print("Upgrade planner bot upgrade blueprint index error - Upgrade unsuccessful: "..belt.name.." -> "..upgrade)
+    player.print("Upgrade planner bot upgrade blueprint index error - Upgrade unsuccessful: "..belt.name.." -> "..serpent.block(upgrade))
     player.cursor_stack.set_stack{name = "upgrade-builder", count = 1}
     return
   end
@@ -1250,30 +1246,30 @@ local b='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
 
 -- encoding
 function enc(data)
-    return ((data:gsub('.', function(x)
-        local r,b='',x:byte()
-        for i=8,1,-1 do r=r..(b%2^i-b%2^(i-1)>0 and '1' or '0') end
-        return r;
-    end)..'0000'):gsub('%d%d%d?%d?%d?%d?', function(x)
-        if (#x < 6) then return '' end
-        local c=0
-        for i=1,6 do c=c+(x:sub(i,i)=='1' and 2^(6-i) or 0) end
-        return b:sub(c+1,c+1)
-    end)..({ '', '==', '=' })[#data%3+1])
+  return ((data:gsub('.', function(x)
+    local r,b='',x:byte()
+    for i=8,1,-1 do r=r..(b%2^i-b%2^(i-1)>0 and '1' or '0') end
+    return r;
+  end)..'0000'):gsub('%d%d%d?%d?%d?%d?', function(x)
+    if (#x < 6) then return '' end
+    local c=0
+    for i=1,6 do c=c+(x:sub(i,i)=='1' and 2^(6-i) or 0) end
+    return b:sub(c+1,c+1)
+  end)..({ '', '==', '=' })[#data%3+1])
 end
 
 -- decoding
 function dec(data)
-    data = string.gsub(data, '[^'..b..'=]', '')
-    return (data:gsub('.', function(x)
-        if (x == '=') then return '' end
-        local r,f='',(b:find(x)-1)
-        for i=6,1,-1 do r=r..(f%2^i-f%2^(i-1)>0 and '1' or '0') end
-        return r;
-    end):gsub('%d%d%d?%d?%d?%d?%d?%d?', function(x)
-        if (#x ~= 8) then return '' end
-        local c=0
-        for i=1,8 do c=c+(x:sub(i,i)=='1' and 2^(8-i) or 0) end
-        return string.char(c)
-    end))
+  data = string.gsub(data, '[^'..b..'=]', '')
+  return (data:gsub('.', function(x)
+    if (x == '=') then return '' end
+    local r,f='',(b:find(x)-1)
+    for i=6,1,-1 do r=r..(f%2^i-f%2^(i-1)>0 and '1' or '0') end
+    return r;
+  end):gsub('%d%d%d?%d?%d?%d?%d?%d?', function(x)
+    if (#x ~= 8) then return '' end
+    local c=0
+    for i=1,8 do c=c+(x:sub(i,i)=='1' and 2^(8-i) or 0) end
+    return string.char(c)
+  end))
 end
