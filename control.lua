@@ -743,9 +743,7 @@ function player_upgrade(player,belt,upgrade, bool)
       if not player.cheat_mode then
         player.insert{name = upgrade.item_from, count = amount}
       end
-      script.raise_event
-      (
-      defines.events.on_player_mined_item,
+      script.raise_event(defines.events.on_player_mined_item,
       {
         player_index = player.index,
         item_stack =
@@ -753,9 +751,8 @@ function player_upgrade(player,belt,upgrade, bool)
           name = upgrade.item_from,
           count = amount
         }
-      }
-    )
-    --And then copy the inventory to some table
+      })
+      --And then copy the inventory to some table
       local inventories = {}
       for index = 1,10 do
         if belt.get_inventory(index) ~= nil then
@@ -800,7 +797,7 @@ function player_upgrade(player,belt,upgrade, bool)
       player.cursor_stack.set_stack{name = "upgrade-builder", count = 1}
     else
       player.remove_item{name = upgrade.item_to, count = amount}
-      player.insert{name = upgrade.item_from, count = amount}
+      --player.insert{name = upgrade.item_from, count = amount}
       script.raise_event(defines.events.on_player_mined_item,{player_index = player.index, item_stack = {name = upgrade.item_from, count = 1}})
       script.raise_event(defines.events.on_built_entity,{player_index = player.index, created_entity = new_item})
     end
