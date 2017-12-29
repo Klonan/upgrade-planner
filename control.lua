@@ -401,12 +401,24 @@ script.on_event(defines.events.on_gui_click, function(event)
   --print_full_gui_name(element)
   local name = element.name
   local player = game.players[event.player_index]
-  --game.print(element.type)
-  --game.print(element.name)
+  local config = global.config[player.name]
+
   if name == "upgrade_blueprint" then
-    upgrade_blueprint(player)
+    local stack = player.cursor_stack
+    if not (stack and stack.valid and stack.valid_for_read) then return end
+    if stack.is_blueprint and upgrade_blueprint(config, stack) then
+      player.print({"upgrade-planner.blueprint-upgrade-successful"})
+    elseif stack.is_blueprint_book then
+      local inv = stack.get_inventory(defines.inventory.item_main)
+      local result = true
+      for i = 1, inv.get_item_count() do
+        result = result and upgrade_blueprint(config, inv[i])
+      end
+      if result then player.print({"upgrade-planner.blueprint-book-upgrade-successful"}) end
+    end
     return
   end
+
   if name == "give_upgrade_tool" then
     player.clean_cursor()
     player.cursor_stack.set_stack({name = "upgrade-builder"})
@@ -995,22 +1007,14 @@ script.on_event(defines.events.on_player_joined_game, function(event)
   gui_init(player)
 end)
 
-function upgrade_blueprint(player)
-  local stack = player.cursor_stack
-  if not stack.valid then
-    return
-  end
-  if not stack.valid_for_read then
-    return
-  end
-  if stack.name ~= "blueprint" then
-    return
-  end
-  if not stack.is_blueprint_setup() then
-    return
-  end
-  local config = global.config[player.name]
-  if not config then return end
+function upgrade_blueprint(config, stack)
+  if not config then return false end
+  if not stack then return false end
+  if not stack.valid then return false end
+  if not stack.valid_for_read then return false end
+  if not stack.is_blueprint then return false end
+  if not stack.is_blueprint_setup() then return false end
+
   local hashmap = get_hashmap(config)
   local entities = stack.get_blueprint_entities()
   if entities then
@@ -1082,7 +1086,7 @@ function upgrade_blueprint(player)
     if new and new.item_to then icons[k].signal.name = new.item_to end
   end
   stack.blueprint_icons = icons
-  player.print({"upgrade-planner.blueprint-upgrade-successful"})
+  return true
 end
 
 function is_exception(from, to)

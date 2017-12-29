@@ -1,8 +1,8 @@
 {
     "name": "upgrade-planner",
-    "version": "1.5.1",
+    "version": "1.5.2",
     "title": "Upgrade Builder and Planner",
-    "author": "Klonan",
+    "author": "Klonan & Fred4106",
     "description": "Automatically upgrade buildings by hand or with construction robots.",
     "homepage": "https://forums.factorio.com/viewtopic.php?f=92&t=14781",
     "factorio_version": "0.16"
