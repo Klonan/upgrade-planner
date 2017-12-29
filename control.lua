@@ -18,19 +18,19 @@ function get_type(entity)
 end
 
 function count_keys(hashmap)
-  
+
   local result = 0
-  
+
   for _, __ in pairs(hashmap) do
     result = result + 1
   end
-  
+
   return result
-  
+
 end
 
 function get_config_item(player, index, type)
-  
+
   if not global["config-tmp"][player.name]
   or index > #global["config-tmp"][player.name]
   or global["config-tmp"][player.name][index][type] == "" then
@@ -42,9 +42,9 @@ function get_config_item(player, index, type)
   if not game.item_prototypes[global["config-tmp"][player.name][index][type]].valid then
     return nil
   end
-  
+
   return game.item_prototypes[global["config-tmp"][player.name][index][type]].name
-  
+
 end
 
 function gui_init(player)
@@ -63,19 +63,19 @@ function gui_init(player)
 end
 
 function gui_open_frame(player)
-  
+
   local flow = player.gui.center
-  
+
   local frame = flow.upgrade_planner_config_frame
-  
+
   if frame then
     frame.destroy()
     global["config-tmp"][player.name] = nil
     return
   end
-  
-  
-  
+
+
+
   global.config[player.name] = global.config[player.name] or {}
   global["config-tmp"][player.name] = {}
   local i = 0
@@ -89,7 +89,7 @@ function gui_open_frame(player)
       }
     end
   end
-  
+
   -- Now we can build the GUI.
   frame = flow.add{
     type = "frame",
@@ -159,7 +159,7 @@ function gui_open_frame(player)
     name = "upgrade_planner_ruleset_grid",
     style = "slot_table"
   }
-  
+
   ruleset_grid.add{
     type = "label",
     caption = {"upgrade-planner.config-header-1"}
@@ -226,7 +226,7 @@ function gui_open_frame(player)
       tooltip = {"upgrade-planner.config-clear", ""}
     }
   end
-  
+
   local button_grid = frame.add{
     type = "table",
     column_count = 4
@@ -264,11 +264,11 @@ function gui_open_frame(player)
 end
 
 function gui_save_changes(player)
-  
+
   -- Saving changes consists in:
   --   1. copying config-tmp to config
   --   2. removing config-tmp
-  
+
   if global["config-tmp"][player.name] then
     local i = 0
     global.config[player.name] = {}
@@ -352,7 +352,7 @@ function gui_clear_rule(player, index)
 end
 
 function gui_restore(player, name)
-  
+
   local frame = player.gui.center.upgrade_planner_config_frame
   if not frame then return end
   if not global.storage[player.name] then return end
@@ -361,7 +361,7 @@ function gui_restore(player, name)
     storage = {}
   end
   if not storage then return end
-  
+
   global["config-tmp"][player.name] = {}
   local items = game.item_prototypes
   local i = 0
@@ -392,11 +392,11 @@ function gui_restore(player, name)
     end
   end
   global.config[player.name] = global["config-tmp"][player.name]
-  
+
 end
 
 script.on_event(defines.events.on_gui_click, function(event)
-  
+
   local element = event.element
   --print_full_gui_name(element)
   local name = element.name
@@ -424,7 +424,7 @@ script.on_event(defines.events.on_gui_click, function(event)
     player.cursor_stack.set_stack({name = "upgrade-builder"})
     return
   end
-  
+
   if name == "upgrade_planner_storage_rename" then
     local children = element.parent.children
     for k, child in pairs (children) do
@@ -436,7 +436,7 @@ script.on_event(defines.events.on_gui_click, function(event)
     end
     return
   end
-  
+
   if name == "upgrade_planner_storage_cancel" then
     local children = element.parent.children
     for k = 4, 6 do
@@ -445,7 +445,7 @@ script.on_event(defines.events.on_gui_click, function(event)
     children[4].text = children[1].get_item(children[1].selected_index)
     return
   end
-  
+
   if name == "upgrade_planner_storage_confirm" then
     local index = global.storage_index[player.name]
     local children = element.parent.children
@@ -485,7 +485,7 @@ script.on_event(defines.events.on_gui_click, function(event)
     global.storage_index[player.name] = index
     return
   end
-  
+
   if name == "upgrade_planner_storage_delete" then
     local children = element.parent.children
     local dropdown = children[1]
@@ -532,7 +532,7 @@ script.on_event(defines.events.on_gui_click, function(event)
       return
     end
   end
-  
+
 end)
 
 script.on_event(defines.events.on_gui_selection_state_changed, function(event)
@@ -548,7 +548,7 @@ script.on_event(defines.events.on_gui_selection_state_changed, function(event)
 end)
 
 script.on_event(defines.events.on_gui_elem_changed, function(event)
-  
+
   local element = event.element
   local player = game.players[event.player_index]
   if not string.find(element.name, "upgrade_planner_") then return end
@@ -574,7 +574,7 @@ end)
 
 function on_selected_area(event)
   if event.item ~= "upgrade-builder" then return end--If its a upgrade builder
-  
+
   local player = game.players[event.player_index]
   local config = global.config[player.name]
   if config == nil then return end
@@ -892,11 +892,11 @@ function bot_upgrade(player, belt, upgrade, bool, hashmap)
   local f = belt.force
   local p = belt.position
   local a = {{p.x-0.5,p.y-0.5},{p.x+0.5,p.y+0.5}}
-  
+
   if belt.to_be_deconstructed(f) then
     return
   end
-  
+
   if belt.type == "underground-belt" then
     if belt.neighbours and bool then
       bot_upgrade(player,belt.neighbours, upgrade, false)
@@ -1104,7 +1104,7 @@ function is_exception(from, to)
 end
 
 script.on_event("upgrade-planner", function(event)
-  local player = game.players[event.player_index] 
+  local player = game.players[event.player_index]
   gui_open_frame(player)
 end)
 
