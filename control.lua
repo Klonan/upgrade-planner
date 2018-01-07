@@ -550,6 +550,9 @@ end)
 
 script.on_init(function()
   global_init()
+  for k, player in pairs (game.players) do
+    gui_init(player)
+  end
 end)
 
 script.on_event(defines.events.on_player_selected_area, function(event)
@@ -799,7 +802,7 @@ function player_upgrade(player,belt,upgrade, bool)
       player.remove_item{name = upgrade.item_to, count = amount}
       --player.insert{name = upgrade.item_from, count = amount}
       script.raise_event(defines.events.on_player_mined_item,{player_index = player.index, item_stack = {name = upgrade.item_from, count = 1}})
-      script.raise_event(defines.events.on_built_entity,{player_index = player.index, created_entity = new_item})
+      script.raise_event(defines.events.on_built_entity,{player_index = player.index, created_entity = new_item, stack = player.cursor_stack})
     end
   else
     global.temporary_ignore[belt.name] = true
@@ -995,23 +998,9 @@ script.on_event(defines.events.on_player_joined_game, function(event)
   gui_init(player)
 end)
 
-function upgrade_blueprint(player)
-  local stack = player.cursor_stack
-  if not stack.valid then
-    return
-  end
-  if not stack.valid_for_read then
-    return
-  end
-  if stack.name ~= "blueprint" then
-    return
-  end
-  if not stack.is_blueprint_setup() then
-    return
-  end
-  local config = global.config[player.name]
-  if not config then return end
-  local hashmap = get_hashmap(config)
+
+function update_blueprint_entities(stack, hashmap)
+  if not (stack and stack.valid and stack.valid_for_read and stack.is_blueprint_setup()) then return end
   local entities = stack.get_blueprint_entities()
   if entities then
     for k, entity in pairs (entities) do
@@ -1082,7 +1071,35 @@ function upgrade_blueprint(player)
     if new and new.item_to then icons[k].signal.name = new.item_to end
   end
   stack.blueprint_icons = icons
-  player.print({"upgrade-planner.blueprint-upgrade-successful"})
+  return true
+end
+
+function upgrade_blueprint(player)
+  local stack = player.cursor_stack
+  if not (stack.valid and stack.valid_for_read) then return end
+
+  local config = global.config[player.name]
+  if not config then return end
+  local hashmap = get_hashmap(config)
+
+  if stack.is_blueprint then
+    if update_blueprint_entities(stack, hashmap) then
+      player.print({"upgrade-planner.blueprint-upgrade-successful"})
+    end
+    return
+  end
+
+  if stack.is_blueprint_book then
+    local inventory = stack.get_inventory(defines.inventory.item_main)
+    local success = 0
+    for k = 1, #inventory do
+      if update_blueprint_entities(inventory[k], hashmap) then
+        success = success + 1
+      end
+    end
+    player.print({"upgrade-planner.blueprint-book-upgrade-successful", success})
+    return
+  end
 end
 
 function is_exception(from, to)
