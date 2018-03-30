@@ -293,14 +293,16 @@ function gui_save_changes(player)
 end
 
 function gui_set_rule(player, type, index, element)
+  local items = game.item_prototypes
   local name = element.elem_value
   local frame = player.gui.center.upgrade_planner_config_frame
   local ruleset_grid = frame["upgrade_planner_ruleset_grid"]
   local storage_name = element.parent.parent.upgrade_planner_storage_flow.children[1].get_item(global.storage_index[player.name])
-  if not frame or not global["config-tmp"][player.name] then return end
+  local storage = global["config-tmp"][player.name]
+  if not frame or not storage then return end
   if not name then
     ruleset_grid["upgrade_planner_" .. type .. "_" .. index].tooltip = ""
-    global["config-tmp"][player.name][index][type] = ""
+    storage[index][type] = ""
     gui_save_changes(player)
     return
   end
@@ -308,16 +310,15 @@ function gui_set_rule(player, type, index, element)
   local i = 0
   if type == "from" then
     opposite = "to"
-    for i = 1, #global["config-tmp"][player.name] do
-      if index ~= i and global["config-tmp"][player.name][i].from == name then
+    for i = 1, #storage do
+      if index ~= i and storage[i].from == name then
         player.print({"upgrade-planner.item-already-set"})
-        --element.elem_value = nil
         gui_restore(player, storage_name)
         return
       end
     end
   end
-  local related = global["config-tmp"][player.name][index][opposite]
+  local related = storage[index][opposite]
   if related ~= "" then
     if related == name then
       player.print({"upgrade-planner.item-is-same"})
@@ -326,16 +327,18 @@ function gui_set_rule(player, type, index, element)
     end
     if get_type(name) ~= get_type(related) and (not is_exception(get_type(name), get_type(related))) then
       player.print({"upgrade-planner.item-not-same-type"})
-      if global["config-tmp"][player.name][index][type] == "" then
+      if storage[index][type] == "" then
         element.elem_value = nil
+      elseif items[storage[index][type]] then
+        element.elem_value = storage[index][type]
       else
-        element.elem_value = global["config-tmp"][player.name][index][type]
+        element.elem_value = nil
       end
       return
     end
   end
-  global["config-tmp"][player.name][index][type] = name
-  ruleset_grid["upgrade_planner_" .. type .. "_" .. index].tooltip = game.item_prototypes[name].localised_name
+  storage[index][type] = name
+  ruleset_grid["upgrade_planner_" .. type .. "_" .. index].tooltip = items[name].localised_name
   gui_save_changes(player)
 end
 
@@ -757,7 +760,7 @@ function player_upgrade(player,belt,upgrade, bool)
       })
       --And then copy the inventory to some table
       local inventories = {}
-      for index = 1,10 do
+      for index = 1, 10 do
         if belt.get_inventory(index) ~= nil then
           inventories[index] = {}
           inventories[index].name = index
@@ -770,31 +773,32 @@ function player_upgrade(player,belt,upgrade, bool)
       player.remove_item{name = upgrade.item_from, count = count}
       local p_x = player.position.x
       local p_y = player.position.y
-      while ghost[1]~= nil do
+      while ghost[1] ~= nil do
         ghost[1].revive()
-        player.teleport({math.random(p_x -5, p_x +5),math.random(p_y -5, p_y +5)})
+        player.teleport({math.random(p_x -5, p_x +5), math.random(p_y -5, p_y +5)})
         ghost = surface.find_entities_filtered{area = a, name = "entity-ghost"}
       end
       player.teleport({p_x,p_y})
-      local assembling = surface.find_entities_filtered{area = a, name = upgrade.entity_to}
-      if not assembling[1] then
+      local assembling = surface.find_entities_filtered{area = a, name = upgrade.entity_to}[1]
+      if not assembling then
         player.print("Upgrade planner error - Entity to raise was not found")
         player.cursor_stack.set_stack{name = "upgrade-builder", count = 1}
         player.insert{name = upgrade.item_from, count = amount}
         return
       end
-      script.raise_event(defines.events.on_built_entity,{player_index = player.index, created_entity = assembling[1]})
+      script.raise_event(defines.events.on_built_entity,{player_index = player.index, created_entity = assembling})
       --Give back the inventory to the new entity
       for j, items in pairs (inventories) do
         for l, contents in pairs (items.contents) do
-          if assembling[1] ~= nil then
-            assembling[1].get_inventory(items.name).insert{name = l, count = contents}
+          if assembling ~= nil then
+            local inv = assembling.get_inventory(items.name)
+            if inv then inv.insert{name = l, count = contents} end
           end
         end
       end
       inventories = nil
       local proxy = surface.find_entities_filtered{area = a, name = "item-request-proxy"}
-      if proxy[1]~= nil then
+      if proxy[1] ~= nil then
         proxy[1].destroy()
       end
       player.cursor_stack.set_stack{name = "upgrade-builder", count = 1}
