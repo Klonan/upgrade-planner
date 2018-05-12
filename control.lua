@@ -577,12 +577,19 @@ function on_selected_area(event)
   global.temporary_ignore = {}
   for k, belt in pairs (event.entities) do --Get the items that are set to be upgraded
     if belt.valid then
-      local upgrade = hashmap[belt.name]
-      if belt.get_module_inventory() then
-        player_upgrade_modules(player, belt.get_module_inventory(), hashmap, belt)
-      end
-      if upgrade ~= nil and upgrade ~= "" then
-        player_upgrade(player,belt,upgrade,true)
+      if belt.name == "entity-ghost" then
+        local upgrade = hashmap[belt.ghost_name]
+        if upgrade ~= nil and upgrade ~= "" then
+          bot_upgrade(player,belt,upgrade,true, hashmap)
+        end
+      else
+        local upgrade = hashmap[belt.name]
+        if belt.get_module_inventory() then
+          player_upgrade_modules(player, belt.get_module_inventory(), hashmap, belt)
+        end
+        if upgrade ~= nil and upgrade ~= "" then
+          player_upgrade(player,belt,upgrade,true)
+        end
       end
     end
   end
@@ -824,12 +831,19 @@ function on_alt_selected_area(event)
   local surface = player.surface
   for k, belt in pairs (event.entities) do
     if belt.valid then
-      local upgrade = hashmap[belt.name]
-      if upgrade and upgrade ~= "" then
-        bot_upgrade(player,belt,upgrade,true, hashmap)
-      end
-      if belt.valid and belt.get_module_inventory() then
-        robot_upgrade_modules(belt.get_module_inventory(), hashmap, belt)
+      if belt.name == "entity-ghost" then
+        local upgrade = hashmap[belt.ghost_name]
+        if upgrade ~= nil and upgrade ~= "" then
+          bot_upgrade(player,belt,upgrade,true, hashmap)
+        end
+      else
+        local upgrade = hashmap[belt.name]
+        if upgrade and upgrade ~= "" then
+          bot_upgrade(player,belt,upgrade,true, hashmap)
+        end
+        if belt.valid and belt.get_module_inventory() then
+          robot_upgrade_modules(belt.get_module_inventory(), hashmap, belt)
+        end
       end
     end
   end
@@ -914,7 +928,7 @@ function bot_upgrade(player, belt, upgrade, bool, hashmap)
   local old_blueprint = player.cursor_stack.get_blueprint_entities()
   local blueprint_index = nil
   for k, entity in pairs (old_blueprint) do
-    if entity.name == belt.name then
+    if entity.name == belt.name or entity.name == belt.ghost_name then
       blueprint_index = k
       break
     end
