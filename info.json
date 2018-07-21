@@ -1,6 +1,6 @@
 {
     "name": "upgrade-planner",
-    "version": "1.5.3",
+    "version": "1.6.0",
     "title": "Upgrade Builder and Planner",
     "author": "Klonan",
     "description": "Automatically upgrade buildings by hand or with construction robots.",

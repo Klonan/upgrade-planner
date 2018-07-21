@@ -229,7 +229,7 @@ function gui_open_frame(player)
 
   local button_grid = frame.add{
     type = "table",
-    column_count = 4
+    column_count = 5
   }
   button_grid.add{
     type = "sprite-button",
@@ -243,6 +243,13 @@ function gui_open_frame(player)
     name = "give_upgrade_tool",
     sprite = "item/upgrade-builder",
     tooltip = {"upgrade-planner.config-button-give-upgrade-tool"},
+    style = mod_gui.button_style
+  }
+  button_grid.add{
+    type = "sprite-button",
+    name = "remove_upgrade_tool",
+    sprite = "utility/remove",
+    tooltip = {"upgrade-planner.config-button-remove-upgrade-tool"},
     style = mod_gui.button_style
   }
   button_grid.add{
@@ -413,6 +420,16 @@ script.on_event(defines.events.on_gui_click, function(event)
   if name == "give_upgrade_tool" then
     player.clean_cursor()
     player.cursor_stack.set_stack({name = "upgrade-builder"})
+    return
+  end
+
+  if name == "remove_upgrade_tool" then
+    player.clean_cursor()
+    -- Remove stacks of item until there is none left
+    while player.get_item_count("upgrade-builder") > 0 do
+      player.remove_item("upgrade-builder")
+    end
+
     return
   end
 
